@@ -26,25 +26,93 @@ export default function Home() {
     pointLight.position.set(4, 2, 6);
     scene.add(ambientLight, pointLight);
 
-    const coreGeometry = new THREE.TorusKnotGeometry(1.1, 0.35, 160, 24);
-    const coreMaterial = new THREE.MeshStandardMaterial({
+    const character = new THREE.Group();
+
+    const bodyMaterial = new THREE.MeshStandardMaterial({
       color: 0x7ef9ff,
       emissive: 0x0f3b6f,
-      roughness: 0.2,
-      metalness: 0.8
+      roughness: 0.35,
+      metalness: 0.6
     });
-    const coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
-    scene.add(coreMesh);
+    const accentMaterial = new THREE.MeshStandardMaterial({
+      color: 0x9d82ff,
+      emissive: 0x1d0f3f,
+      roughness: 0.4,
+      metalness: 0.5
+    });
+    const darkMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0b0f1f,
+      roughness: 0.6,
+      metalness: 0.2
+    });
 
-    const ringGeometry = new THREE.RingGeometry(1.8, 2.1, 64);
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+    const headGeometry = new THREE.SphereGeometry(0.55, 32, 32);
+    const bodyGeometry = new THREE.CapsuleGeometry(0.45, 0.9, 12, 24);
+    const limbGeometry = new THREE.CapsuleGeometry(0.18, 0.55, 6, 16);
+    const eyeGeometry = new THREE.SphereGeometry(0.08, 16, 16);
+    const antennaGeometry = new THREE.CylinderGeometry(0.06, 0.08, 0.4, 16);
+    const orbGeometry = new THREE.SphereGeometry(0.12, 16, 16);
+
+    const headMesh = new THREE.Mesh(headGeometry, accentMaterial);
+    headMesh.position.set(0, 1.25, 0);
+
+    const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    bodyMesh.position.set(0, 0.35, 0);
+
+    const leftArm = new THREE.Mesh(limbGeometry, bodyMaterial);
+    leftArm.position.set(-0.7, 0.5, 0);
+    leftArm.rotation.z = Math.PI * 0.12;
+
+    const rightArm = new THREE.Mesh(limbGeometry, bodyMaterial);
+    rightArm.position.set(0.7, 0.5, 0);
+    rightArm.rotation.z = -Math.PI * 0.12;
+
+    const leftLeg = new THREE.Mesh(limbGeometry, accentMaterial);
+    leftLeg.position.set(-0.25, -0.65, 0);
+    leftLeg.rotation.z = Math.PI * 0.05;
+
+    const rightLeg = new THREE.Mesh(limbGeometry, accentMaterial);
+    rightLeg.position.set(0.25, -0.65, 0);
+    rightLeg.rotation.z = -Math.PI * 0.05;
+
+    const leftEye = new THREE.Mesh(eyeGeometry, darkMaterial);
+    leftEye.position.set(-0.18, 1.32, 0.48);
+
+    const rightEye = new THREE.Mesh(eyeGeometry, darkMaterial);
+    rightEye.position.set(0.18, 1.32, 0.48);
+
+    const antenna = new THREE.Mesh(antennaGeometry, bodyMaterial);
+    antenna.position.set(0, 1.7, -0.05);
+
+    const antennaOrb = new THREE.Mesh(orbGeometry, accentMaterial);
+    antennaOrb.position.set(0, 1.95, -0.05);
+
+    character.add(
+      headMesh,
+      bodyMesh,
+      leftArm,
+      rightArm,
+      leftLeg,
+      rightLeg,
+      leftEye,
+      rightEye,
+      antenna,
+      antennaOrb
+    );
+    scene.add(character);
+
+    const ringGeometry = new THREE.TorusGeometry(1.4, 0.06, 16, 100);
+    const ringMaterial = new THREE.MeshStandardMaterial({
+      color: 0x9d82ff,
+      emissive: 0x1d0f3f,
+      roughness: 0.4,
+      metalness: 0.7,
       transparent: true,
-      opacity: 0.35,
-      side: THREE.DoubleSide
+      opacity: 0.6
     });
     const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-    ringMesh.rotation.x = Math.PI * 0.5;
+    ringMesh.rotation.x = Math.PI * 0.35;
+    ringMesh.position.y = 0.2;
     scene.add(ringMesh);
 
     const particleGeometry = new THREE.BufferGeometry();
@@ -86,9 +154,13 @@ export default function Home() {
 
     const animate = () => {
       const elapsed = clock.getElapsedTime();
-      coreMesh.rotation.x = elapsed * 0.35;
-      coreMesh.rotation.y = elapsed * 0.55;
-      ringMesh.rotation.z = elapsed * 0.25;
+      character.rotation.y = elapsed * 0.45;
+      character.position.y = Math.sin(elapsed * 1.4) * 0.08;
+      leftArm.rotation.x = Math.sin(elapsed * 2) * 0.35;
+      rightArm.rotation.x = -Math.sin(elapsed * 2) * 0.35;
+      leftLeg.rotation.x = -Math.sin(elapsed * 2) * 0.25;
+      rightLeg.rotation.x = Math.sin(elapsed * 2) * 0.25;
+      ringMesh.rotation.z = elapsed * 0.35;
       particles.rotation.y = elapsed * 0.15;
       camera.position.y = Math.sin(elapsed * 0.4) * 0.2 + 0.3;
       renderer.render(scene, camera);
@@ -102,8 +174,15 @@ export default function Home() {
         cancelAnimationFrame(frameId);
       }
       window.removeEventListener("resize", resizeRenderer);
-      coreGeometry.dispose();
-      coreMaterial.dispose();
+      headGeometry.dispose();
+      bodyGeometry.dispose();
+      limbGeometry.dispose();
+      eyeGeometry.dispose();
+      antennaGeometry.dispose();
+      orbGeometry.dispose();
+      bodyMaterial.dispose();
+      accentMaterial.dispose();
+      darkMaterial.dispose();
       ringGeometry.dispose();
       ringMaterial.dispose();
       particleGeometry.dispose();
@@ -117,10 +196,10 @@ export default function Home() {
       <section className="hero">
         <div className="hero__copy">
           <p className="eyebrow">Nebula One Platform</p>
-          <h1>Landing page dengan animasi Three.js untuk presentasi produk futuristik.</h1>
+          <h1>Landing page dengan karakter 3D interaktif untuk presentasi produk futuristik.</h1>
           <p className="subtitle">
             Kembangkan pengalaman interaktif dengan Next.js dan Three.js. Desain ini menonjolkan
-            visual 3D yang lembut, fokus pada pesan brand, dan call-to-action yang jelas.
+            karakter 3D yang ramah, fokus pada pesan brand, dan call-to-action yang jelas.
           </p>
           <div className="actions">
             <button className="primary">Mulai Demo</button>
@@ -151,8 +230,8 @@ export default function Home() {
         <h2>Kenapa Nebula One?</h2>
         <div className="feature-grid">
           <article>
-            <h3>Real-time 3D</h3>
-            <p>Animasi ringan dengan kontrol penuh, mudah disesuaikan untuk kampanye atau demo produk.</p>
+            <h3>Karakter 3D</h3>
+            <p>Maskot 3D yang bisa dianimasikan untuk menyampaikan pesan brand dengan lebih hangat.</p>
           </article>
           <article>
             <h3>Performa Next.js</h3>
